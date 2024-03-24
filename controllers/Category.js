@@ -57,11 +57,14 @@ exports.showAllCategory = async (req, res) => {
 
 exports.categoryPageDetails = async (req, res) => {
     try {
+        // get categorId
         const { categoryId } = req.body;
 
         // get all courses for the specified Category
-        const selectedCategory = await Category.findById(categoryId).populate('courses').exec();
-        
+        const selectedCategory = await Category.findById(categoryId)
+            .populate('courses')
+            .exec();
+
         // validate Category
         if (!selectedCategory) {
             console.log("Category Not Found!");
@@ -70,9 +73,32 @@ exports.categoryPageDetails = async (req, res) => {
                 messgae: "No Such Category Found",
             });
         }
-        
         console.log("All Courses Of  Selected Category : ", selectedCategory);
-    } catch (error) {
 
+        // get courses for different Categories
+        const differentCategories = await Category.find({
+            _id: { $ne: categoryId }
+        })
+        .populate('courses')
+            .exec();
+        
+        // HW get top selling courses
+
+        // return response
+        return res.status(200).json({
+            success: true,
+            data: {
+                selectedCategory,
+                differentCategories
+            },
+
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+            message:"Error in categoryPageDetails Controller"
+        })
     }
 }

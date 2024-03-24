@@ -1,6 +1,8 @@
 const SubSection = require('../models/SubSection');
 const Section = require('../models/Section');
-const { uploadImageToCloudinary } = require('../utils/imageUploader');
+const { uploadToCloudinary } = require('../utils/cloudinaryUploader');
+require('dotenv').config();
+const mongoose = require('mongoose');
 
 exports.createSubSection = async (req, res) => {
     try {
@@ -16,7 +18,7 @@ exports.createSubSection = async (req, res) => {
             });
         }
         // upload video to cloudinary
-        const uploadDetails = await uploadImageToCloudinary(videoFile, process.env.FOLDER_NAME);
+        const uploadDetails = await uploadToCloudinary(videoFile, process.env.FOLDER_NAME);
         const videoUrl = uploadDetails.secure_url;
         // create subSection
         const subSectionDetails = await SubSection.create({ title, timeDuration, description, videoUrl });
@@ -33,6 +35,7 @@ exports.createSubSection = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Sub_Section created Successfully",
+            subSectionDetails,
             updatedSection
         });
     } catch (error) {
@@ -50,22 +53,31 @@ exports.updateSubSection = async (req, res) => {
         //fetch data
         const { subSectionId, title, description, timeDuration } = req.body;
         const videoFile = req.files.videoFile;
+
         //validate data
-        if (!title || !description || !timeDuration || videoFile) {
+        if (!subSectionId || !title || !description || !timeDuration || !videoFile) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required"
             });
         }
+
         //upload video to Cloudinary
-        const uploadDetails = await uploadImageToCloudinary(videoFile, process.env.FOLDER_NAME);
+        const uploadDetails = await uploadToCloudinary(videoFile, process.env.FOLDER_NAME);
+        const videoUrl = uploadDetails.secure_url;
+        // console.log("Subsection secure_url", videoUrl);
+        // console.log("Uploaded Details Update Sub Section Controller : ", uploadDetails);
+
         //update data
         const updatedSubSection = await SubSection.findByIdAndUpdate(subSectionId, {
             title,
-            description,
             timeDuration,
-            videoUrl: uploadDetails.secure_url
-        });
+            description,
+            videoUrl
+        }, { new: true });
+        console.log("Update SubSection Controller updatedSubSection: ", updatedSubSection);
+
+
         //return response
         return res.status(200).json({
             success: true,

@@ -1,6 +1,7 @@
-const mailSender = require('../utils/mailSender');
+const { mailSender } = require('../utils/mailSender');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
 //resetPasswordToken
 exports.resetPasswordToken = async (req, res) => {
@@ -15,7 +16,8 @@ exports.resetPasswordToken = async (req, res) => {
                 message: "Your Email is not Registered with Us"
             });
         }
-        //generate token
+        //generate 
+        
         const token = crypto.randomUUID();
         console.log("Token For reset Password : ", token);
         //update user by adding token and expiration time
@@ -35,6 +37,7 @@ exports.resetPasswordToken = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             success: false,
+            error: error.message,
             message: "Something went Wrong While sending reset psw mail!"
         });
     }
@@ -64,7 +67,7 @@ exports.resetPassword = async (req, res) => {
         const user = await User.findOne({ token: token });
         // if no entry  - invalid token
         if (!user) {
-            res.json({
+           return res.json({
                 success: false,
                 message: "Invalid User Token!"
             });
@@ -82,7 +85,7 @@ exports.resetPassword = async (req, res) => {
         //password update
         +
 
-        await User.findByIdAndUpdate(user._id, { password: hashedpassword }, { new: true });
+         await User.findByIdAndUpdate(user._id, { password: hashedpassword }, { new: true });
 
         // return response
         return res.status(200).json({

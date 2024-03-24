@@ -9,7 +9,7 @@ const otpGenerator = require('otp-generator');
 
 
 //send OTP
-exports.sendOTP = async (req, res) => {
+exports.sendotp = async (req, res) => {
     try {
         //fetch email from req body
         const { email } = req.body;
@@ -31,7 +31,7 @@ exports.sendOTP = async (req, res) => {
             lowerCaseAlphabets: false,
             specialChars: false,
         })
-        console.log(otp);
+        console.log("OTP : ", otp);
 
         // check unique otp or not if not unique then re generate
         let result = await OTP.findOne({ otp: otp });
@@ -66,7 +66,7 @@ exports.sendOTP = async (req, res) => {
 }
 
 // Sign Up
-exports.signUp = async (req, res) => {
+exports.signup = async (req, res) => {
     try {
         // fetch data from req body
         const {
@@ -115,7 +115,7 @@ exports.signUp = async (req, res) => {
                 success: false,
                 message: "OTP Not Found"
             });
-        } else if (otp != recentOTP) {
+        } else if (otp != recentOTP[0].otp) {
             // Invalid OTP
             return res.status(400).json({
                 success: false,
@@ -176,7 +176,7 @@ exports.login = async (req, res) => {
         }
 
         //user check exist or not
-        const user = await User.findOne({ email }, populate('additionalDetails'));
+        const user = await User.findOne({ email }).populate('additionalDetails');
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -191,7 +191,7 @@ exports.login = async (req, res) => {
                 id: user._id,
                 accountType: user.accountType,
             }
-            
+
             const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
             user.token = token;
             user.password = undefined;

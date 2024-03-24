@@ -45,7 +45,7 @@ exports.updateProfile = async (req, res) => {
 }
 
 //Delete Account
-// Explore --> how we can scheduke this deletion operation
+// Explore --> how we can schedule this deletion operation
 exports.deleteAccount = async (req, res) => {
     try {
         // get user Id
@@ -84,7 +84,6 @@ exports.deleteAccount = async (req, res) => {
 }
 
 //get User All details
-
 exports.getAllUserDetails = async (req, res) => {
     try {
         //get id
@@ -109,5 +108,25 @@ exports.getAllUserDetails = async (req, res) => {
             message: "Something Went Wrong While fetching the User Details",
             error: error.message
         })
+    }
+}
+
+//updateDisplayPicture
+exports.updateDisplayPicture = async(req, res) =>{
+    try {
+        const { profilePic } = req.body;
+        const userId = req.user.id;
+        
+    } catch (error) {
+        
+    }
+}
+//gettEnrolledCourses
+
+exports.getEnrolledCourses = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        
     }
 }

@@ -1,3 +1,4 @@
+const { courseEnrollementEmail } = require('../mail/templates/courseEnrollmentEmail');
 const Course = require('../models/Course');
 const Section = require('../models/Section');
 
@@ -60,10 +61,10 @@ exports.updateSection = async (req, res) => {
                 message: "All Fields are Required"
             })
         }
-        
+
         // update data
         const updatedSection = await Section.findByIdAndUpdate(sectionId, { sectionName: sectionName }, { new: true });
-        
+
         //return response
         return res.status(200).json({
             success: true,
@@ -82,29 +83,33 @@ exports.updateSection = async (req, res) => {
 exports.deleteSection = async (req, res) => {
     try {
         ///fetch Data from req.params
-        const { sectionId } = req.params;
+        const { sectionId, courseId } = req.body;
         //validate data
-        if (!sectionId) {
+        if (!sectionId || !courseId) {
             return res.status(402).json({
                 success: false,
                 message: "All fields are required"
             });
         }
-        
-        //remove the section from the Course
-        // await Course.findById
+
+
+        // Here perform some validation for the invalid Section Id And Invalid Course Id
 
         //delete section
-        const deletedSection = Section.findByIdAndDelete(sectionId);
+        const deletedSection = await Section.findByIdAndDelete(sectionId);
+
+        //remove the section from the Course
+        const updatedCourse = await Course.findByIdAndUpdate(courseId, { $pull: { courseContent: sectionId } }, { new: true });
 
         //return response
         return res.status(200).json({
             success: true,
             message: "Section deleted Successfully",
-            deletedSection: deletedSection
+            deletedSection,
+            updatedCourse
         });
     } catch (error) {
-        return res.status(500), json({
+        return res.status(500).json({
             success: false,
             message: "Something went Wrong While deleting a Section",
             error: error.message,

@@ -1,6 +1,5 @@
-const jwt = require('jsonwebtoken')
-require("dotenv").config()
-const User = require('../models/User')
+const jwt = require('jsonwebtoken');
+require("dotenv").config();
 
 //auth
 exports.auth = async (req, res, next) => {
@@ -17,6 +16,7 @@ exports.auth = async (req, res, next) => {
                 message: "Token Is Missing",
             });
         }
+        console.log("Token in Auth Middleware : ", token);
         //verify token
         try {
             const decode = jwt.verify(token, process.env.JWT_SECRET);
@@ -63,6 +63,7 @@ exports.isStudent = async (req, res, next) => {
 //isInstructor
 exports.isInstructor = async (req, res, next) => {
     try {
+        console.log("Instructor Controller : ", req.user.accountType);
         if (req.user.accountType !== "Instructor") {
             return res.status(401).json({
                 sucess: false,
@@ -84,21 +85,25 @@ exports.isInstructor = async (req, res, next) => {
 //isAdmin
 exports.isAdmin = async (req, res, next) => {
     try {
-        if (req.user.accountType !== "Admin") {
+        console.log("req.user in Admin Controller : ", req.user);
+        console.log("Admin Controller : ", req.user.accountType);
+
+        if (req.user && req.user.accountType === 'Admin') {
+            next();
+        } else {
             return res.status(401).json({
                 sucess: false,
                 message: "This is Protected Route For Admin Only!",
-                error: error
             });
         }
-        next();
     } catch (error) {
-        return res.status(400).json({
+        // An error occurred while verifying user role
+        console.error("Error in isAdmin middleware:", error);
+        return res.status(500).json({
             success: false,
-            message: "User Role cannot be verified, please try again",
-            error: error
+            message: "Internal server error while verifying user role."
         });
     }
-}
+};
 
 

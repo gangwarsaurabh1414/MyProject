@@ -3,7 +3,7 @@ const Category = require('../models/Category');
 const User = require('../models/User');
 const { uploadToCloudinary } = require('../utils/cloudinaryUploader');
 
-// createCourse handler function
+//  createCourse handler function
 exports.createCourse = async (req, res) => {
     try {
         //fetch data 
@@ -87,7 +87,7 @@ exports.createCourse = async (req, res) => {
     }
 }
 
-// get all courses handler function
+//  get all courses handler function
 exports.getAllCourses = async (req, res) => {
     try {
         const allCourses = await Course.find({}, {
@@ -123,5 +123,61 @@ exports.getAllCourses = async (req, res) => {
     }
 }
 
+//  get a particular course details
+exports.getCourseDetails = async (req, res) => {
+    try {
+        //fetch coure Id from req.body
+        const { courseId } = req.body;
 
-// exports.createCi
+        // validate course id
+        if (!courseId) {
+            return res.status(402).json({
+                success: false,
+                message: "Course Id Is Required!",
+            });
+        }
+        //fetch Course from DB
+        const courseDetails = await Course.findById(courseId)
+            .populate({
+                path: "instructor",
+                populate: {
+                    path: 'additionalDetails',
+                }
+            })
+            .populate("category")
+            .populate('ratingAndReview')
+            .populate({
+                path: "courseContent",
+                populate: {
+                    path: "subSection"
+                }
+            })
+            .exec();
+        
+        //validate course
+        if (!courseDetails) {
+            return res.status(401).josn({
+                success: false,
+                message: "Course Not Found Invalid Course Id"
+            });
+        }
+
+        // return response
+        return res.status(200).json({
+            success: true,
+            message: "Course Details fetched successfully",
+            data: courseDetails
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong in getCourseDetails Controller!",
+            error: error.message,
+        });
+    }
+}
+
+//  
